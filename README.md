@@ -15,4 +15,5 @@ Salesforce1 sample made with AngularJS
 <ul>
   <li>UnsynchronizedLoad</li>
   <li>UnsynchronizedLoadJSforce</li>
+  <li>UnsynchronizedLoadJSforce2</li>
 </ul>
