@@ -1,0 +1,231 @@
+<apex:page standardStyleSheets="false" showHeader="false" sidebar="false" docType="html-5.0">
+<html ng-app="ngModule">
+<head>
+    <apex:stylesheet value="{!URLFOR($Resource.OneStarter,'icons.css')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.OneStarter,'styles.css')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.OneStarter,'OneStarter.css')}"/>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" />
+
+    <apex:includeScript value="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"/>
+    <apex:includeScript value="{!URLFOR($Resource.OneStarter,'jquery.onestarter.js')}"/>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.5/angular.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jsforce/1.4.1/jsforce.min.js"></script>
+
+    <style>
+        h1 {
+            font-size: 16pt;
+            border-bottom: solid 1px #999;
+        }
+        .navbar-right a:hover {
+            text-decoration: none;
+        }
+        .well {
+            margin:2px 0 !important;
+        }
+    </style>
+
+    <script>
+        //salesforrce1 starter
+        $(document).ready(function() {
+            s1 = $('div#one-app').oneStarter('app');
+        });
+        //salesforce Login UserId
+        var userId = '{!$User.Id}';
+        //jsforce
+        var conn = new jsforce.Connection({ accessToken: '{!$Api.Session_Id}' });
+
+        var LoadCtl = function($scope,$timeout){
+            $scope.loginUser = {};  //User
+            $scope.accounts = {};   //Map<Id,Account>
+            $scope.leads = {};      //Map<Id,Lead>
+
+            //User
+            // >> Account
+            // >> Lead
+            var soqlUser = 'SELECT Id, Name, CompanyName, Department FROM User WHERE Id = \'' + userId + '\'';
+            conn.query(soqlUser, function(err, res) {
+                if(!err){
+                    if(res.records.length == 1){
+                        $timeout(function(){
+                            $scope.loginUser = res.records[0];
+                        },0);
+                        $scope.searchAccounts(userId);
+                        $scope.searchLeads(userId);
+                    }
+                }
+            });
+
+            //Account
+            // >> Contact
+            // >> Case
+            $scope.searchAccounts = function(userId){
+                var soqlAccount = 'SELECT Id, Name, Industry, Site FROM Account WHERE OwnerId = \'' + userId + '\'';
+                conn.query(soqlAccount, function(err, res) {
+                    if(!err){
+                        angular.forEach(res.records, function(account,i){
+                            $timeout(function(){
+                                $scope.accounts[account.Id] = account;
+                            },0);
+                            $scope.searchContacts(userId, account.Id);
+                            $scope.searchCases(userId, account.Id);
+                        });
+                    }
+                });
+            }
+
+            //Contact
+            $scope.searchContacts = function(userId, accountId){
+                var soqlContact = 'SELECT Id, Name, AccountId, Department FROM Contact WHERE OwnerId = \'' + userId + '\' AND AccountId = \'' + accountId + '\'';
+                conn.query(soqlContact, function(err, res) {
+                    if(!err){
+                        $scope.accounts[accountId].contacts = [];
+                        angular.forEach(res.records, function(contact,i){
+                            $timeout(function(){
+                                $scope.accounts[accountId].contacts.push(contact);
+                            },0);
+                        });
+                    }
+                });
+            }
+
+            //Case
+            $scope.searchCases = function(userId, accountId){
+                var soqlCase = 'SELECT Id, Subject, Priority, Status, Contact.Name FROM Case WHERE OwnerId = \'' + userId + '\' AND AccountId = \'' + accountId + '\'';
+                conn.query(soqlCase, function(err, res) {
+                    if(!err){
+                        $scope.accounts[accountId].cases = [];
+                        angular.forEach(res.records, function(_case,i){
+                            $timeout(function(){
+                                $scope.accounts[accountId].cases.push(_case);
+                            },0);
+                        });
+                    }
+                });
+            }
+
+            //Lead
+            // >> Event
+            $scope.searchLeads = function(userId){
+                var soqlLead = 'SELECT Id, Name, Company, Title FROM Lead WHERE OwnerId = \'' + userId + '\'';
+                conn.query(soqlLead, function(err, res) {
+                    if(!err){
+                        angular.forEach(res.records, function(lead,i){
+                            $timeout(function(){
+                                $scope.leads[lead.Id] = lead;
+                            },0);
+                            $scope.searchEvents(userId, lead.Id);
+                        });
+                    }
+                });
+            }
+
+            //Event
+            $scope.searchEvents = function(userId, leadId){
+                var soqlEvent = 'SELECT Id, Subject, StartDateTime FROM Event WHERE OwnerId = \'' + userId + '\' AND WhoId = \'' + leadId + '\'';
+                conn.query(soqlEvent, function(err, res) {
+                    if(!err){
+                        $scope.leads[leadId].events = [];
+                        angular.forEach(res.records, function(event,i){
+                            $timeout(function(){
+                                $scope.leads[leadId].events.push(event);
+                            },0);
+                        });
+                    }
+                });
+            }
+
+        }
+
+        var UnEscapeFilter = function(){
+            return function(input){
+                if (input != null){
+                    return input.replace(/\&quot\;/g, '"').replace(/\&amp\;/g, '&');
+                }
+            };
+        };
+
+        var NgModule = angular.module('ngModule', []);
+        NgModule.controller('LoadController', LoadCtl);
+        NgModule.filter('unescape', UnEscapeFilter);
+    </script>
+</head>
+
+<div id="one-app" ng-controller="LoadController">
+    <div class="container" style="margin-top:20px;">
+
+        <div class="navbar-right" >
+            <a href="/home/home.jsp"><span class="glyphicon glyphicon-home"></span> HOME</a>
+        </div>
+
+        <h1>Sequentially load the related objects of login user. with JSforce ver2</h1>
+
+        <div style="margin-top:30px;">
+
+            <div ng-cloak="true" class="well col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div style="font-weight: bold;">
+                    <div class="icon icon-left icon--avatar" ></div>
+                    {{loginUser.Name | unescape}}
+                </div>
+                <p class="list-group-item-text">
+                    {{loginUser.CompanyName | unescape}}
+                    {{loginUser.Department | unescape}}
+                </p>
+            </div>
+
+            <div ng-repeat="(aid,account) in accounts" ng-cloak="true" class="well col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                <div style="font-weight: bold;">
+                    <div class="icon icon-left icon--account" ></div>
+                    {{account.Name | unescape}}
+                </div>
+                <p class="list-group-item-text">
+                    {{account.Industry | unescape}}
+                    {{account.Site | unescape}}
+                </p>
+                <div ng-show="account.contacts.length" class="list-group" style="margin:10px 0 0 0 !important;">
+                    <div ng-repeat="(cid,contact) in account.contacts" ng-cloak="true" class="list-group-item">
+                        <div class="icon icon-left icon--contact" ></div>
+                        <span style="font-weight: bold;">{{contact.Name | unescape}}</span>
+                        <p class="list-group-item-text">
+                            {{contact.Department | unescape}}
+                        </p>
+                    </div>
+                </div>
+                <div ng-show="account.cases.length" class="list-group" style="margin:10px 0 0 0 !important;">
+                    <div ng-repeat="(caid,case) in account.cases" ng-cloak="true" class="list-group-item">
+                        <div class="icon icon-left icon--case" ></div>
+                        <span style="font-weight: bold;">{{case.Subject | unescape}}</span>
+                        <p class="list-group-item-text">
+                            {{case.Priority | unescape}}
+                            {{case.Status | unescape}}
+                            {{case.Contact.Name | unescape}}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div ng-repeat="(lid,lead) in leads" ng-cloak="true" class="well col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                <div style="font-weight: bold;">
+                    <div class="icon icon-left icon--lead" ></div>
+                    {{lead.Name | unescape}}
+                </div>
+                <p class="list-group-item-text">
+                    {{lead.Company | unescape}}
+                    {{lead.Title | unescape}}
+                </p>
+                <div ng-show="lead.events.length" class="list-group" style="margin:10px 0 0 0 !important;">
+                    <div ng-repeat="(eid,event) in lead.events" ng-cloak="true" class="list-group-item">
+                        <div class="icon icon-left icon--event" ></div>
+                        <span style="font-weight: bold;">{{event.Subject | unescape}}</span>
+                        <p class="list-group-item-text">
+                            {{event.StartDateTime}}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</html>
+</apex:page>
