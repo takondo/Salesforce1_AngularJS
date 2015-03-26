@@ -8,9 +8,11 @@ Salesforce1 sample made with AngularJS
   <li>Bootstrap</li>
   <li>Force.com</li>
   <li>Force.com OneStarter</li>
+  <li>JSforce</li>
 </ul>
 
 <h3>Sample</h3>
 <ul>
   <li>UnsynchronizedLoad</li>
+  <li>UnsynchronizedLoadJSforce</li>
 </ul>
