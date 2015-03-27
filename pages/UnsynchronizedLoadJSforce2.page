@@ -164,7 +164,7 @@
 
             <div ng-cloak="true" class="well col-xs-12 col-sm-12 col-md-12 col-lg-12">
                 <div style="font-weight: bold;">
-                    <div class="icon icon-left icon--avatar" ></div>
+                    <div class="icon icon-left icon--avatar bgs-100 a-mid mhm sq-30" ></div>
                     {{loginUser.Name | unescape}}
                 </div>
                 <p class="list-group-item-text">
@@ -175,7 +175,7 @@
 
             <div ng-repeat="(aid,account) in accounts" ng-cloak="true" class="well col-xs-12 col-sm-12 col-md-6 col-lg-4">
                 <div style="font-weight: bold;">
-                    <div class="icon icon-left icon--account" ></div>
+                    <div class="icon icon-left icon--account bgs-100 a-mid mhm sq-30" ></div>
                     {{account.Name | unescape}}
                 </div>
                 <p class="list-group-item-text">
@@ -184,7 +184,7 @@
                 </p>
                 <div ng-show="account.contacts.length" class="list-group" style="margin:10px 0 0 0 !important;">
                     <div ng-repeat="(cid,contact) in account.contacts" ng-cloak="true" class="list-group-item">
-                        <div class="icon icon-left icon--contact" ></div>
+                        <div class="icon icon-left icon--contact bgs-100 a-mid mhm sq-30" ></div>
                         <span style="font-weight: bold;">{{contact.Name | unescape}}</span>
                         <p class="list-group-item-text">
                             {{contact.Department | unescape}}
@@ -193,7 +193,7 @@
                 </div>
                 <div ng-show="account.cases.length" class="list-group" style="margin:10px 0 0 0 !important;">
                     <div ng-repeat="(caid,case) in account.cases" ng-cloak="true" class="list-group-item">
-                        <div class="icon icon-left icon--case" ></div>
+                        <div class="icon icon-left icon--case bgs-100 a-mid mhm sq-30" ></div>
                         <span style="font-weight: bold;">{{case.Subject | unescape}}</span>
                         <p class="list-group-item-text">
                             {{case.Priority | unescape}}
@@ -206,7 +206,7 @@
 
             <div ng-repeat="(lid,lead) in leads" ng-cloak="true" class="well col-xs-12 col-sm-12 col-md-6 col-lg-4">
                 <div style="font-weight: bold;">
-                    <div class="icon icon-left icon--lead" ></div>
+                    <div class="icon icon-left icon--lead bgs-100 a-mid mhm sq-30" ></div>
                     {{lead.Name | unescape}}
                 </div>
                 <p class="list-group-item-text">
@@ -215,7 +215,7 @@
                 </p>
                 <div ng-show="lead.events.length" class="list-group" style="margin:10px 0 0 0 !important;">
                     <div ng-repeat="(eid,event) in lead.events" ng-cloak="true" class="list-group-item">
-                        <div class="icon icon-left icon--event" ></div>
+                        <div class="icon icon-left icon--event bgs-100 a-mid mhm sq-30" ></div>
                         <span style="font-weight: bold;">{{event.Subject | unescape}}</span>
                         <p class="list-group-item-text">
                             {{event.StartDateTime}}
